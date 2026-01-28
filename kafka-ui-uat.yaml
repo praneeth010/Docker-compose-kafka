@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-ui-uat
+  namespace: uat
+  labels:
+    app: kafka-ui-uat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-ui-uat
+  template:
+    metadata:
+      labels:
+        app: kafka-ui-uat
+    spec:
+      containers:
+        - name: kafka-ui-uat
+          image: provectuslabs/kafka-ui:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: KAFKA_CLUSTERS_0_NAME
+              value: "crs-kafka-uat"
+            - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+              value: "kafka-cluster.uat.svc.cluster.local:9092"
+            - name: KAFKA_CLUSTERS_0_ZOOKEEPER
+              value: "crs-zookeeper.uat.svc.cluster.local:2181"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-ui-uat
+  namespace: uat
+spec:
+  type: LoadBalancer
+  selector:
+    app: kafka-ui-uat
+  ports:
+    - port: 80
+      targetPort: 8080
